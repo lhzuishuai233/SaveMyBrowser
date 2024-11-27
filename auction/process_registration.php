@@ -4,13 +4,8 @@
 // an account. Notify user of success/failure and redirect/give navigation 
 // options.
 
-// 和database.php一样的操作，后期需要更换为include database.php，在那个php文件中也需要删掉Drop语句
-$servername = "localhost";
-$new_user = "COMP0178"; 
-$new_password = "DatabaseCW"; 
-$dbname = "AuctionSystem"; 
-
-$connection = mysqli_connect($servername, $new_user, $new_password, $dbname);
+//和database.php一样的操作，后期需要更换为include database.php，在那个php文件中也需要删掉Drop语句
+include_once("database.php"); // 修改为 database.php
 
 if (!$connection) {
     die("Error connecting to database: " . mysqli_connect_error());
@@ -57,16 +52,19 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 对密码进行哈希加密
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
-    // 插入用户数据到 Users 表
-    $sql = "INSERT INTO Users (Email, Password, Role) VALUES (?, ?, ?)";
+    // 插入用户数据到 users 表
+    $sql = "INSERT INTO users (username, password_hash, account_type) VALUES (?, ?, ?)";
     $stmt = mysqli_prepare($connection, $sql);
     mysqli_stmt_bind_param($stmt, "sss", $email, $hashed_password, $accountType);
 
     if (mysqli_stmt_execute($stmt)) {
-        echo "<p style='color: green;'>Account successfully created! You can now <a href='browse.php'>log in</a>.</p>";
+        // 注册完成后返回browse.php
+        echo "<script>alert('Account successfully created! Click OK to login.'); window.location.href = 'browse.php';</script>";
     } else {
-        if (mysqli_errno($connection) === 1062) { // 检测重复邮箱错误
-            echo "<p style='color: red;'>This email is already registered. Please use a different email.</p>";
+        if (mysqli_errno($connection) === 1062) { 
+            // 检测重复邮箱错误，弹出提示框
+            echo "<script>alert('This email is already registered. Please use a different email.'); window.location.href = 'register.php';</script>";
+            //echo "<p style='color: red;'>This email is already registered. Please use a different email.</p>";
         } else {
             echo "<p style='color: red;'>Error creating account: " . mysqli_error($connection) . "</p>";
         }
