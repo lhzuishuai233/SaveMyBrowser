@@ -8,45 +8,42 @@
 session_start();
 
 // 连接数据库，需被修改
-$servername = "localhost";
-$username = "COMP0178";
-$password = "DatabaseCW"; 
-$dbname = "AuctionSystem";
-
-$connection = mysqli_connect($servername, $username, $password, $dbname);
+// 已修改
+include_once("con_database.php");
 
 if (!$connection) {
     die("Error connecting to database: " . mysqli_connect_error());
 }
 
-
 // 检查是否通过 POST 提交
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 提取表单数据
-    $email = trim($_POST['email'] ?? '');
+    $username = trim($_POST['username'] ?? '');
     $password = trim($_POST['password'] ?? '');
 
     // 验证输入是否为空
-    if (empty($email) || empty($password)) {
+    if (empty($username) || empty($password)) {
         echo '<p style="color: red;">Email and password are required.</p>';
         exit;
     }
 
     // 查询数据库验证用户
-    $sql = "SELECT * FROM Users WHERE Email = ?";
+    $sql = "SELECT * FROM users WHERE username = ?";
     $stmt = mysqli_prepare($connection, $sql);
-    mysqli_stmt_bind_param($stmt, "s", $email);
+    mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    if ($user = mysqli_fetch_assoc($result)) {
+    // if ($user = mysqli_fetch_assoc($result)) 
+    $user = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    if (count($user) > 0) {
         // 验证密码
-        if (password_verify($password, $user['Password'])) {
+        if (password_verify($password, $user[0]['password_hash'])) {
             // 设置会话变量
             $_SESSION['logged_in'] = true;
-            $_SESSION['username'] = $user['Email']; // 这里可以存储其他字段作为用户名
-            $_SESSION['account_type'] = $user['Role'];
-            $_SESSION['userid'] = $user['UserId'];
+            $_SESSION['username'] = $user[0]['username']; // 这里可以存储其他字段作为用户名
+            $_SESSION['account_type'] = $user[0]['account_type'];
+            $_SESSION['userid'] = $user[0]['id'];
 
             // 登录成功提示
             echo '<div class="text-center">You are now logged in! You will be redirected shortly.</div>';
@@ -57,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo '<p style="color: red;">Invalid password. Please try again.</p>';
         }
     } else {
-        echo '<p style="color: red;">No account found with this email.</p>';
+        echo '<p style="color: red;">Wrong! Copy and solve it later.</p>';
     }
 
     // 关闭语句
