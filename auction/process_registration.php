@@ -57,18 +57,33 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $stmt = mysqli_prepare($connection, $sql);
     mysqli_stmt_bind_param($stmt, "sss", $email, $hashed_password, $accountType);
 
-    if (mysqli_stmt_execute($stmt)) {
-        // 注册完成后返回browse.php
-        echo "<script>alert('Account successfully created! Click OK to login.'); window.location.href = 'browse.php';</script>";
-    } else {
-        if (mysqli_errno($connection) === 1062) { 
-            // 检测重复邮箱错误，弹出提示框
-            echo "<script>alert('This email is already registered. Please use a different email.'); window.location.href = 'register.php';</script>";
-            //echo "<p style='color: red;'>This email is already registered. Please use a different email.</p>";
+    // if (mysqli_stmt_execute($stmt)) {
+    //     // 注册完成后返回browse.php
+    //     echo "<script>alert('Account successfully created! Click OK to login.'); window.location.href = 'browse.php';</script>";
+    // } else {
+    //     if (mysqli_errno($connection) === 1062) { 
+    //         // 检测重复邮箱错误，弹出提示框
+    //         echo "<script>alert('This email is already registered. Please use a different email.'); window.location.href = 'register.php';</script>";
+    //         //echo "<p style='color: red;'>This email is already registered. Please use a different email.</p>";
+    //     } else {
+    //         echo "<p style='color: red;'>Error creating account: " . mysqli_error($connection) . "</p>";
+    //     }
+    // }
+    // 修改 增加异常捕获，解决无法检测重复邮箱的问题
+    try {
+        if (mysqli_stmt_execute($stmt)) {
+            echo "<script>alert('Account successfully created! Click OK to login.'); window.location.href = 'browse.php';</script>";
         } else {
-            echo "<p style='color: red;'>Error creating account: " . mysqli_error($connection) . "</p>";
+            throw new Exception(mysqli_error($connection), mysqli_errno($connection));
+        }
+    } catch (Exception $e) {
+        if ($e->getCode() === 1062) {
+            echo "<script>alert('This email is already registered. Please use a different email.'); window.location.href = 'register.php';</script>";
+        } else {
+            echo "<p style='color: red;'>Error creating account: " . $e->getMessage() . "</p >";
         }
     }
+    
 
     // 关闭语句
     mysqli_stmt_close($stmt);
