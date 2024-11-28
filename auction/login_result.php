@@ -19,7 +19,7 @@ if (!$connection) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 提取表单数据
     $username = trim($_POST['username'] ?? '');
-    $password = trim($_POST['password_hash'] ?? '');
+    $password = trim($_POST['password'] ?? '');
 
     // 验证输入是否为空
     if (empty($username) || empty($password)) {
@@ -34,7 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
-    if ($user = mysqli_fetch_assoc($result)) {
+    // if ($user = mysqli_fetch_assoc($result)) 
+    $user = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    if (count($user) > 0) {
         // 验证密码
         if (password_verify($password, $user['password_hash'])) {
             // 设置会话变量
@@ -47,12 +49,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             echo '<div class="text-center">You are now logged in! You will be redirected shortly.</div>';
             // Redirect to index after 5 seconds
             // 我改成了1秒，方便测试登入功能
-            header("refresh:1;url=index.php");
+            header("refresh:5;url=index.php");
         } else {
             echo '<p style="color: red;">Invalid password. Please try again.</p>';
         }
     } else {
-        echo '<p style="color: red;">No account found with this email.</p>';
+        echo '<p style="color: red;">Wrong! Copy and solve it later.</p>';
     }
 
     // 关闭语句
