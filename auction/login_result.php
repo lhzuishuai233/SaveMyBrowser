@@ -9,7 +9,7 @@ session_start();
 
 // 连接数据库，需被修改
 // 已修改
-include_once("database.php");
+include_once("con_database.php");
 
 if (!$connection) {
     die("Error connecting to database: " . mysqli_connect_error());

@@ -5,7 +5,7 @@
 // options.
 
 //和database.php一样的操作，后期需要更换为include database.php，在那个php文件中也需要删掉Drop语句
-include_once("database.php"); // 修改为 database.php
+include_once("con_database.php"); // 修改为 database.php
 
 if (!$connection) {
     die("Error connecting to database: " . mysqli_connect_error());
