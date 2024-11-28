@@ -30,7 +30,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 查询数据库验证用户
     $sql = "SELECT * FROM users WHERE username = ?";
     $stmt = mysqli_prepare($connection, $sql);
-    mysqli_stmt_bind_param($stmt, "s", $email);
+    mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
 
@@ -38,18 +38,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $user = mysqli_fetch_all($result, MYSQLI_ASSOC);
     if (count($user) > 0) {
         // 验证密码
-        if (password_verify($password, $user['password_hash'])) {
+        if (password_verify($password, $user[0]['password_hash'])) {
             // 设置会话变量
             $_SESSION['logged_in'] = true;
-            $_SESSION['username'] = $user['username']; // 这里可以存储其他字段作为用户名
-            $_SESSION['account_type'] = $user['account_type'];
-            $_SESSION['userid'] = $user['id'];
+            $_SESSION['username'] = $user[0]['username']; // 这里可以存储其他字段作为用户名
+            $_SESSION['account_type'] = $user[0]['account_type'];
+            $_SESSION['userid'] = $user[0]['id'];
 
             // 登录成功提示
             echo '<div class="text-center">You are now logged in! You will be redirected shortly.</div>';
             // Redirect to index after 5 seconds
             // 我改成了1秒，方便测试登入功能
-            header("refresh:5;url=index.php");
+            header("refresh:1;url=index.php");
         } else {
             echo '<p style="color: red;">Invalid password. Please try again.</p>';
         }

@@ -92,7 +92,7 @@
       <div class="modal-body">
         <form method="POST" action="login_result.php">
           <div class="form-group">
-            <label for="username">mail</label>
+            <label for="username">Email</label>
             <input type="text" class="form-control" name="username" id="username" placeholder="Email">
           </div>
           <div class="form-group">
