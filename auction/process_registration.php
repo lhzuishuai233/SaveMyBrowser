@@ -44,8 +44,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // 如果有错误，显示错误信息并终止
     if (!empty($errors)) {
         foreach ($errors as $error) {
-            echo "<p style='color: red;'>$error</p>";
+            // echo "<p style='color: red;'>$error</p>";
+            echo "<script>alert('$error');</script>";
         }
+        echo "<script>window.location.href = 'register.php';</script>";
         exit;
     }
 
