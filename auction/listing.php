@@ -21,17 +21,35 @@
   $num_bids = 1;
   $end_time = new DateTime('2020-11-02T00:00:00');
 
-  SELECT 
-    i.ItemName AS title,                   
-    i.Description AS description,           
-    a.StartingPrice AS starting_price,      
-    IFNULL(MAX(b.BidAmount), a.StartingPrice) AS highest_bid, //Get the current highest bid, if there is no bid return to the starting bid 
-    COUNT(b.BidId) AS num_bids,             
-    a.EndDate AS end_time                 
-FROM Auctions a                             
-JOIN Items i ON a.ItemId = i.ItemId       //Associate the Auctions table with the Items table by ItemId
-LEFT JOIN Bids b ON a.AuctionId = b.AuctionId
-WHERE a.AuctionId = ?                      
+  $sql = "
+    SELECT 
+      i.ItemName AS title,                   
+      i.Description AS description,           
+      a.StartingPrice AS starting_price,      
+      IFNULL(MAX(b.BidAmount), a.StartingPrice) AS highest_bid, 
+      -- Get the current highest bid, if there is no bid return to the starting bid 
+      COUNT(b.BidId) AS num_bids,             
+      a.EndDate AS end_time                 
+    FROM Auctions a 
+    -- Associate the Auctions table with the Items table by ItemId                            
+    JOIN Items i ON a.ItemId = i.ItemId      
+    LEFT JOIN Bids b ON a.AuctionId = b.AuctionId
+    WHERE a.AuctionId = ?;
+  $stmt = $connection->prepare($sql);
+  $stmt->bind_param('i', $item_id);
+  $stmt->execute();
+  $result = $stmt->get_result();
+
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $title = $row['title'];
+    $description = $row['description'];
+    $current_price = $row['highest_bid'];
+    $num_bids = $row['num_bids'];
+    $end_time = new DateTime($row['end_time']);
+  } else {
+    die("Auction not found.");
+  }                      
 
 
 
@@ -52,7 +70,7 @@ WHERE a.AuctionId = ?
     LEFT JOIN Users u ON b.BuyerId = u.UserId
     WHERE a.AuctionId = ?
     GROUP BY a.AuctionId;";
-  }
+  
     $stmt = $connection->prepare($sql);
     $stmt->bind_param('i', $item_id); 
     $stmt->execute();
@@ -78,6 +96,7 @@ WHERE a.AuctionId = ?
     } else {
         echo "No auction data found.";
     }
+  }
     
   if ($now < $end_time) {
     $time_to_end = date_diff($now, $end_time);
@@ -88,9 +107,21 @@ WHERE a.AuctionId = ?
   // TODO: If the user has a session, use it to make a query to the database
   //       to determine if the user is already watching this item.
   //       For now, this is hardcoded.
-  $has_session = true;
-  $watching = false;
+  //$has_session = true; //是否登录
 ?>
+  session_start();
+  $has_session = isset($_SESSION['user_id']); //check if has been log in
+  $watching = false;//是否关注
+
+  if ($has_session) {
+    $sql = "SELECT * FROM Watchlist WHERE user_id = ? AND auction_id = ?";
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param('ii', $_SESSION['user_id'], $item_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $watching = ($result->num_rows > 0);
+}
+
 
 
 <div class="container">
