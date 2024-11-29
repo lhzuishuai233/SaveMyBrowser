@@ -41,10 +41,48 @@ WHERE a.AuctionId = ?
   
   // Calculate time to auction end:
   $now = new DateTime();
-  
+  if ($now > $end_time) {
+    $sql = "
+    SELECT 
+        MAX(b.BidAmount) AS final_price,  //get the highest bid
+        a.ReservePrice AS reserve_price,  //get the reserve price
+        u.UserId AS winner_id           
+    FROM Auctions a
+    LEFT JOIN Bids b ON a.AuctionId = b.AuctionId
+    LEFT JOIN Users u ON b.BuyerId = u.UserId
+    WHERE a.AuctionId = ?
+    GROUP BY a.AuctionId;";
+  }
+    $stmt = $connection->prepare($sql);
+    $stmt->bind_param('i', $item_id); 
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+ 
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $final_price = $row['final_price'];
+        $reserve_price = $row['reserve_price'];
+        $winner_id = $row['winner_id'];
+
+        if ($final_price >= $reserve_price) { 
+            // 如果最高出价达到或超过保留价，拍卖成功
+            echo "Auction ended successfully! Final price: £" . number_format($final_price, 2) . ". Winner: User ID " . $winner_id . ".";
+        } elseif ($final_price > 0) { 
+            // 如果有出价但未达到保留价，流拍
+            echo "Auction ended but reserve price (£" . number_format($reserve_price, 2) . ") was not met. Auction failed.";
+        } else { 
+            // 如果没有任何出价
+            echo "Auction ended with no bids. Auction failed.";
+        }
+    } else {
+        echo "No auction data found.";
+    }
+    
   if ($now < $end_time) {
     $time_to_end = date_diff($now, $end_time);
     $time_remaining = ' (in ' . display_time_remaining($time_to_end) . ')';
+    echo "Auction is ongoing. Ends in: " . $time_remaining;
   }
   
   // TODO: If the user has a session, use it to make a query to the database
