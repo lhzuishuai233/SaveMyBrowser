@@ -1,11 +1,18 @@
 <?php include_once("header.php")?>
 <?php require("utilities.php")?>
 
-<?php
-  // Get info from the URL:
-  $item_id = $_GET['item_id'];
+// TODO: Use item_id to make a query to the database.
 
-  // TODO: Use item_id to make a query to the database.
+// make sure we have the connection variable for the database connection
+<?php require_once("database.php")?>
+ 
+// Get info from the URL:
+// check that if the item_id in URL is effective
+  if (isset($_GET['item_id']) && is_numeric($_GET['item_id'])) {
+    $item_id = $_GET['item_id'];
+} else {
+    die("Invalid item ID.");
+}
 
   // DELETEME: For now, using placeholder data.
   $title = "Placeholder title";
@@ -13,6 +20,20 @@
   $current_price = 30.50;
   $num_bids = 1;
   $end_time = new DateTime('2020-11-02T00:00:00');
+
+  SELECT 
+    i.ItemName AS title,                   
+    i.Description AS description,           
+    a.StartingPrice AS starting_price,      
+    IFNULL(MAX(b.BidAmount), a.StartingPrice) AS highest_bid, //Get the current highest bid, if there is no bid return to the starting bid 
+    COUNT(b.BidId) AS num_bids,             
+    a.EndDate AS end_time                 
+FROM Auctions a                             
+JOIN Items i ON a.ItemId = i.ItemId       //Associate the Auctions table with the Items table by ItemId
+LEFT JOIN Bids b ON a.AuctionId = b.AuctionId
+WHERE a.AuctionId = ?                      
+
+
 
   // TODO: Note: Auctions that have ended may pull a different set of data,
   //       like whether the auction ended in a sale or was cancelled due
