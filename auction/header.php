@@ -79,17 +79,17 @@
 </nav>
 
 <!-- Login modal -->
-<div class="modal fade" id="loginModal">
+<!-- <div class="modal fade" id="loginModal">
   <div class="modal-dialog">
-    <div class="modal-content">
+    <div class="modal-content"> -->
 
       <!-- Modal Header -->
-      <div class="modal-header">
+      <!-- <div class="modal-header">
         <h4 class="modal-title">Login</h4>
-      </div>
+      </div> -->
 
       <!-- Modal body -->
-      <div class="modal-body">
+      <!-- <div class="modal-body">
         <form method="POST" action="login_result.php">
           <div class="form-group">
             <label for="username">Email</label>
@@ -106,4 +106,47 @@
 
     </div>
   </div>
-</div> <!-- End modal -->
+</div>  -->
+<!-- End modal -->
+
+<!-- <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <title>Login</title>
+</head>
+<body>
+
+<div class="container text-center mt-5">
+  <button onclick="window.location.href='login.php'" class="btn btn-primary">Login</button>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+</body>
+</html> -->
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <a class="navbar-brand" href="#">Site Name</a>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item">
+                <a class="nav-link" href="#">Browse</a>
+            </li>
+        </ul>
+        <ul class="navbar-nav ml-auto">
+            <!-- Login Button Added Here -->
+            <li class="nav-item">
+                <a class="nav-link btn btn-primary text-white" href="login.php">Login</a>
+            </li>
+        </ul>
+    </div>
+</nav>
