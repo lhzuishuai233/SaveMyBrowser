@@ -12,7 +12,8 @@ include_once("auction_database.php");
 
 // 检查用户是否已登录
 if (!isset($_SESSION['userid'])) {
-    echo json_encode("Error: You must be logged in to modify your watchlist");
+    // echo json_encode("Error: You must be logged in to modify your watchlist");
+    echo "<script>alert('You must be logged in to modify your watchlist. Click OK to login.'); window.location.href='login.php';</script>";
     return;
 }
 
