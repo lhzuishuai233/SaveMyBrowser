@@ -1,71 +1,65 @@
 <?php
+session_start();
 
 if (!isset($_POST['functionname']) || !isset($_POST['arguments'])) {
-    return;
+  return;
 }
+$servername = "localhost";
+$username = "COMP0178";
+$password = "DatabaseCW";
+$dbname = "AuctionSystem";
 
+// 创建数据库连接
+$connection = mysqli_connect($servername, $username, $password, $dbname);
+
+if (!$connection) {
+  die("Error connecting to database: " . mysqli_connect_error());
+}
 // Extract arguments from the POST variables:
-$item_id = intval($_POST['arguments']); // 确保 item_id 是整数
-
-session_start();
-include_once("auction_database.php");
-
-// 检查用户是否已登录
-if (!isset($_SESSION['userid'])) {
-    // echo json_encode("Error: You must be logged in to modify your watchlist");
-    echo "<script>alert('You must be logged in to modify your watchlist. Click OK to login.'); window.location.href='login.php';</script>";
-    return;
-}
-
-$user_id = $_SESSION['userid']; // 当前用户的 ID
+$item_id = $_POST['arguments'];
+$user_id = $_SESSION['userid'];
 
 if ($_POST['functionname'] == "add_to_watchlist") {
-    // TODO: Update database and return success/failure.
-  
-    // 添加商品到 watchlist 表
-    $sql = "INSERT INTO watchlist (user_id, item_id) VALUES (?, ?)";
-    $stmt = mysqli_prepare($connection, $sql);
-    mysqli_stmt_bind_param($stmt, "ii", $user_id, $item_id);
+  // TODO: Update database and return success/failure.
+  $sql = "INSERT INTO Watchlist (UserId, ItemId) VALUES (?, ?)";
+  $stmt = mysqli_prepare($connection, $sql);
 
+  if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "ii", $user_id, $item_id);
     if (mysqli_stmt_execute($stmt)) {
-        $res = "success";
+      $res = "success"; // 操作成功
     } else {
-        // 检测是否重复添加
-        if (mysqli_errno($connection) == 1062) {
-            $res = "Error: Item already in watchlist";
-        } else {
-            $res = "Error: " . mysqli_error($connection);
-        }
+      $res = "failure";
     }
     mysqli_stmt_close($stmt);
-} elseif ($_POST['functionname'] == "remove_from_watchlist") {
-    // TODO: Update database and return success/failure.
-  
-    // 从 watchlist 表中移除商品
-    $sql = "DELETE FROM watchlist WHERE user_id = ? AND item_id = ?";
-    $stmt = mysqli_prepare($connection, $sql);
-    mysqli_stmt_bind_param($stmt, "ii", $user_id, $item_id);
+  } else {
+    $res = "failure";
+  }
 
+} else if ($_POST['functionname'] == "remove_from_watchlist") {
+  // TODO: Update database and return success/failure.
+  $sql = "DELETE FROM Watchlist WHERE UserId = ? AND ItemId = ?";
+  $stmt = mysqli_prepare($connection, $sql);
+
+  if ($stmt) {
+    mysqli_stmt_bind_param($stmt, "ii", $user_id, $item_id);
     if (mysqli_stmt_execute($stmt)) {
-        if (mysqli_stmt_affected_rows($stmt) > 0) {
-            $res = "success";
-        } else {
-            $res = "Error: Item not found in watchlist";
-        }
+      $res = "success"; // 操作成功
     } else {
-        $res = "Error: " . mysqli_error($connection);
+      $res = "failure";
     }
     mysqli_stmt_close($stmt);
+  } else {
+    $res = "failure";
+  }
 } else {
-    $res = "Error: Invalid function name";
+  $res = "failure";
 }
 
 // Note: Echoing from this PHP function will return the value as a string.
 // If multiple echo's in this file exist, they will concatenate together,
 // so be careful. You can also return JSON objects (in string form) using
 // echo json_encode($res).
-echo json_encode($res);
+echo $res;
 
-// 关闭数据库连接
-mysqli_close($connection);
 ?>
